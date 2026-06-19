@@ -1,8 +1,6 @@
 -- ==========================================
 -- MODULAR LIBRARY DEMO
 -- ==========================================
--- Make sure the "src" folder is a ModuleScript in Roblox Studio
--- For example, if this script is in StarterGui, and src is a ModuleScript next to it:
 local Library = require(script.Parent.src)
 
 local win = Library:CreateWindow({
@@ -15,36 +13,69 @@ local visualsTab = win:CreateTab("Visuals")
 local miscTab = win:CreateTab("Misc")
 
 local mainGb = aimbotTab:CreateGroupbox("Main Settings")
-mainGb:AddToggle("Enable Aimbot", function(state) 
-    print("Aimbot:", state) 
-end)
 
-mainGb:AddKeybind("Aimbot Key", Enum.KeyCode.E, function()
-    print("Aimbot key pressed!")
-end)
+mainGb:AddToggle("AimbotEnabled", {
+    Text = "Enable Aimbot",
+    Default = false,
+    Callback = function(state) 
+        print("Aimbot:", state) 
+    end
+})
 
-mainGb:AddDropdown("Target Part", {"Head", "Torso", "HumanoidRootPart"}, function(val)
-    print("Selected Part:", val)
-end)
+mainGb:AddKeybind("AimbotKey", {
+    Text = "Aimbot Key",
+    Default = Enum.KeyCode.E,
+    Callback = function()
+        print("Aimbot key pressed!")
+    end
+})
 
-mainGb:AddSlider("Smoothing", 1, 100, function(val) 
-    print("Smoothing:", val) 
-end)
+mainGb:AddDropdown("TargetPart", {
+    Text = "Target Part",
+    Values = {"Head", "Torso", "HumanoidRootPart"},
+    Default = "Head",
+    Callback = function(val)
+        print("Selected Part:", val)
+    end
+})
+
+mainGb:AddSlider("AimbotSmoothing", {
+    Text = "Smoothing",
+    Min = 1,
+    Max = 100,
+    Default = 50,
+    Callback = function(val) 
+        print("Smoothing:", val) 
+    end
+})
 
 local espGb = visualsTab:CreateGroupbox("ESP Settings")
-espGb:AddToggle("Enable ESP", function(state) end)
 
-espGb:AddColorPicker("Box Color", Color3.fromRGB(0, 185, 255), function(color)
-    print("Box Color changed:", color)
-end)
+espGb:AddToggle("ESPEnabled", {
+    Text = "Enable ESP",
+    Default = true,
+    Callback = function(state) end
+})
 
-espGb:AddColorPicker("Text Color", Color3.new(1, 1, 1), function(color)
-    print("Text Color changed:", color)
-end)
+espGb:AddColorPicker("ESPBoxColor", {
+    Text = "Box Color",
+    Default = Color3.fromRGB(0, 185, 255),
+    Callback = function(color)
+        print("Box Color changed:", color)
+    end
+})
+
+espGb:AddColorPicker("ESPTextColor", {
+    Text = "Text Color",
+    Default = Color3.new(1, 1, 1),
+    Callback = function(color)
+        print("Text Color changed:", color)
+    end
+})
 
 local settingsGb = miscTab:CreateGroupbox("Config")
 settingsGb:AddButton("Save Config", function()
-    print("Config Saved!")
+    print("Config Saved! Aimbot State is:", Library.Flags["AimbotEnabled"])
 end)
 
 return Library

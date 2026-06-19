@@ -1,4 +1,4 @@
--- NEVERLOSE UI BUNDLED LIBRARY
+-- NEVERLOSE UI LIBRARY
 local __modules = {}
 local function __require(name)
     if type(__modules[name]) == 'function' then
@@ -102,13 +102,17 @@ __modules["Toggle"] = function()
     local Toggle = {}
     Toggle.__index = Toggle
     
-    function Toggle.new(text, callback, groupbox)
+    function Toggle.new(options, groupbox)
         local self = setmetatable({}, Toggle)
-        self.Text = text
-        self.Callback = callback or function() end
+        self.Options = options
+        self.Text = options.Text
+        self.Flag = options.Flag
+        self.Callback = options.Callback or function() end
         self.Groupbox = groupbox
         self.Library = groupbox.Library
-        self.State = false
+        self.State = options.Default or false
+        
+        self.Library.Flags[self.Flag] = self.State
         
         local theme = self.Library.Theme
         local util = self.Library.Util
@@ -132,7 +136,7 @@ __modules["Toggle"] = function()
         fill.Position = UDim2.new(0, 1, 0, 1)
         fill.BackgroundColor3 = theme:GetColor("Accent")
         fill.BorderSizePixel = 0
-        fill.BackgroundTransparency = 1
+        fill.BackgroundTransparency = self.State and 0 or 1
         fill.Parent = box
         self.Fill = fill
         
@@ -141,7 +145,7 @@ __modules["Toggle"] = function()
         label.Size = UDim2.new(1, -20, 1, 0)
         label.Position = UDim2.new(0, 20, 0, 0)
         label.BackgroundTransparency = 1
-        label.TextColor3 = theme:GetColor("TextDark")
+        label.TextColor3 = self.State and theme:GetColor("Text") or theme:GetColor("TextDark")
         label.TextSize = theme:GetFont("SmallSize")
         label.Font = theme:GetFont("Main")
         label.TextXAlignment = Enum.TextXAlignment.Left
@@ -157,6 +161,8 @@ __modules["Toggle"] = function()
     
     function Toggle:SetState(state)
         self.State = state
+        self.Library.Flags[self.Flag] = self.State
+        
         local theme = self.Library.Theme
         local util = self.Library.Util
         
@@ -176,16 +182,20 @@ __modules["Slider"] = function()
     local Slider = {}
     Slider.__index = Slider
     
-    function Slider.new(text, min, max, callback, groupbox)
+    function Slider.new(options, groupbox)
         local self = setmetatable({}, Slider)
-        self.Text = text
-        self.Min = min
-        self.Max = max
-        self.Callback = callback or function() end
+        self.Options = options
+        self.Text = options.Text
+        self.Flag = options.Flag
+        self.Min = options.Min or 0
+        self.Max = options.Max or 100
+        self.Callback = options.Callback or function() end
         self.Groupbox = groupbox
         self.Library = groupbox.Library
-        self.Value = min
+        self.Value = options.Default or self.Min
         self.Dragging = false
+        
+        self.Library.Flags[self.Flag] = self.Value
         
         local theme = self.Library.Theme
         
@@ -206,7 +216,7 @@ __modules["Slider"] = function()
         label.Parent = container
         
         local valLabel = Instance.new("TextLabel")
-        valLabel.Text = tostring(min)
+        valLabel.Text = tostring(self.Value)
         valLabel.Size = UDim2.new(1, 0, 0, 15)
         valLabel.BackgroundTransparency = 1
         valLabel.TextColor3 = theme:GetColor("Text")
@@ -226,8 +236,9 @@ __modules["Slider"] = function()
         bar.Parent = container
         self.Bar = bar
         
+        local initialPct = (self.Value - self.Min) / (self.Max - self.Min)
         local fill = Instance.new("Frame")
-        fill.Size = UDim2.new(0, 0, 1, 0)
+        fill.Size = UDim2.new(initialPct, 0, 1, 0)
         fill.BackgroundColor3 = theme:GetColor("Accent")
         fill.BorderSizePixel = 0
         fill.Parent = bar
@@ -259,6 +270,7 @@ __modules["Slider"] = function()
         local pct = math.clamp((mouseX - barPos) / barSize, 0, 1)
         
         self.Value = math.floor(self.Min + ((self.Max - self.Min) * pct))
+        self.Library.Flags[self.Flag] = self.Value
         self.ValueLabel.Text = tostring(self.Value)
         
         local util = self.Library.Util
@@ -269,6 +281,7 @@ __modules["Slider"] = function()
     
     function Slider:SetValue(val)
         self.Value = math.clamp(val, self.Min, self.Max)
+        self.Library.Flags[self.Flag] = self.Value
         local pct = (self.Value - self.Min) / (self.Max - self.Min)
         self.ValueLabel.Text = tostring(self.Value)
         
@@ -339,15 +352,19 @@ __modules["Dropdown"] = function()
     local Dropdown = {}
     Dropdown.__index = Dropdown
     
-    function Dropdown.new(text, options, callback, groupbox)
+    function Dropdown.new(options, groupbox)
         local self = setmetatable({}, Dropdown)
-        self.Text = text
-        self.Options = options or {}
-        self.Callback = callback or function() end
+        self.OptionsTable = options
+        self.Text = options.Text
+        self.Flag = options.Flag
+        self.Options = options.Values or {}
+        self.Callback = options.Callback or function() end
         self.Groupbox = groupbox
         self.Library = groupbox.Library
-        self.Value = self.Options[1] or ""
+        self.Value = options.Default or self.Options[1] or ""
         self.Open = false
+        
+        self.Library.Flags[self.Flag] = self.Value
         
         local theme = self.Library.Theme
         local util = self.Library.Util
@@ -466,6 +483,7 @@ __modules["Dropdown"] = function()
     
     function Dropdown:SetValue(val)
         self.Value = val
+        self.Library.Flags[self.Flag] = self.Value
         self.Button.Text = " " .. tostring(val)
         self:BuildOptions()
         task.spawn(self.Callback, self.Value)
@@ -479,14 +497,18 @@ __modules["ColorPicker"] = function()
     local ColorPicker = {}
     ColorPicker.__index = ColorPicker
     
-    function ColorPicker.new(text, default, callback, groupbox)
+    function ColorPicker.new(options, groupbox)
         local self = setmetatable({}, ColorPicker)
-        self.Text = text
-        self.Color = default or Color3.new(1, 1, 1)
-        self.Callback = callback or function() end
+        self.OptionsTable = options
+        self.Text = options.Text
+        self.Flag = options.Flag
+        self.Color = options.Default or Color3.new(1, 1, 1)
+        self.Callback = options.Callback or function() end
         self.Groupbox = groupbox
         self.Library = groupbox.Library
         self.Open = false
+        
+        self.Library.Flags[self.Flag] = self.Color
         
         local theme = self.Library.Theme
         local util = self.Library.Util
@@ -531,6 +553,7 @@ __modules["ColorPicker"] = function()
         
         local function UpdateColor()
             self.Color = Color3.new(rSlider.Value, gSlider.Value, bSlider.Value)
+            self.Library.Flags[self.Flag] = self.Color
             self.Button.BackgroundColor3 = self.Color
             task.spawn(self.Callback, self.Color)
         end
@@ -618,14 +641,18 @@ __modules["Keybind"] = function()
     local Keybind = {}
     Keybind.__index = Keybind
     
-    function Keybind.new(text, default, callback, groupbox)
+    function Keybind.new(options, groupbox)
         local self = setmetatable({}, Keybind)
-        self.Text = text
-        self.Key = default or Enum.KeyCode.Unknown
-        self.Callback = callback or function() end
+        self.OptionsTable = options
+        self.Text = options.Text
+        self.Flag = options.Flag
+        self.Key = options.Default or Enum.KeyCode.Unknown
+        self.Callback = options.Callback or function() end
         self.Groupbox = groupbox
         self.Library = groupbox.Library
         self.Binding = false
+        
+        self.Library.Flags[self.Flag] = self.Key
         
         local theme = self.Library.Theme
         
@@ -666,10 +693,12 @@ __modules["Keybind"] = function()
             if self.Binding then
                 if input.UserInputType == Enum.UserInputType.Keyboard then
                     self.Key = input.KeyCode
+                    self.Library.Flags[self.Flag] = self.Key
                     self.Binding = false
                     btn.Text = self:GetKeyName()
                 elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 then
                     self.Key = input.UserInputType
+                    self.Library.Flags[self.Flag] = self.Key
                     self.Binding = false
                     btn.Text = self:GetKeyName()
                 end
@@ -755,14 +784,20 @@ __modules["Groupbox"] = function()
         return self
     end
     
-    function Groupbox:AddToggle(text, callback)
-        local toggle = Toggle.new(text, callback, self)
+    function Groupbox:AddToggle(idx, options)
+        options = options or {}
+        options.Flag = idx
+        options.Text = options.Text or idx
+        local toggle = Toggle.new(options, self)
         table.insert(self.Elements, toggle)
         return toggle
     end
     
-    function Groupbox:AddSlider(text, min, max, callback)
-        local slider = Slider.new(text, min, max, callback, self)
+    function Groupbox:AddSlider(idx, options)
+        options = options or {}
+        options.Flag = idx
+        options.Text = options.Text or idx
+        local slider = Slider.new(options, self)
         table.insert(self.Elements, slider)
         return slider
     end
@@ -773,20 +808,29 @@ __modules["Groupbox"] = function()
         return button
     end
     
-    function Groupbox:AddDropdown(text, options, callback)
-        local dropdown = Dropdown.new(text, options, callback, self)
+    function Groupbox:AddDropdown(idx, options)
+        options = options or {}
+        options.Flag = idx
+        options.Text = options.Text or idx
+        local dropdown = Dropdown.new(options, self)
         table.insert(self.Elements, dropdown)
         return dropdown
     end
     
-    function Groupbox:AddColorPicker(text, default, callback)
-        local picker = ColorPicker.new(text, default, callback, self)
+    function Groupbox:AddColorPicker(idx, options)
+        options = options or {}
+        options.Flag = idx
+        options.Text = options.Text or idx
+        local picker = ColorPicker.new(options, self)
         table.insert(self.Elements, picker)
         return picker
     end
     
-    function Groupbox:AddKeybind(text, default, callback)
-        local keybind = Keybind.new(text, default, callback, self)
+    function Groupbox:AddKeybind(idx, options)
+        options = options or {}
+        options.Flag = idx
+        options.Text = options.Text or idx
+        local keybind = Keybind.new(options, self)
         table.insert(self.Elements, keybind)
         return keybind
     end
@@ -982,7 +1026,9 @@ __modules["init"] = function()
     
     local Library = {
         Theme = ThemeManager,
-        Util = Utility
+        Util = Utility,
+        Flags = {},
+        Unloaded = false
     }
     
     function Library:CreateWindow(options)
@@ -993,54 +1039,4 @@ __modules["init"] = function()
     
 end
 
-local Library = __require('init')
--- ==========================================
--- MODULAR LIBRARY DEMO
--- ==========================================
--- Make sure the "src" folder is a ModuleScript in Roblox Studio
--- For example, if this script is in StarterGui, and src is a ModuleScript next to it:
-
-
-local win = Library:CreateWindow({
-    Title = "NEVERLOSE MODULAR UI",
-    Size = UDim2.new(0, 550, 0, 400)
-})
-
-local aimbotTab = win:CreateTab("Aimbot")
-local visualsTab = win:CreateTab("Visuals")
-local miscTab = win:CreateTab("Misc")
-
-local mainGb = aimbotTab:CreateGroupbox("Main Settings")
-mainGb:AddToggle("Enable Aimbot", function(state) 
-    print("Aimbot:", state) 
-end)
-
-mainGb:AddKeybind("Aimbot Key", Enum.KeyCode.E, function()
-    print("Aimbot key pressed!")
-end)
-
-mainGb:AddDropdown("Target Part", {"Head", "Torso", "HumanoidRootPart"}, function(val)
-    print("Selected Part:", val)
-end)
-
-mainGb:AddSlider("Smoothing", 1, 100, function(val) 
-    print("Smoothing:", val) 
-end)
-
-local espGb = visualsTab:CreateGroupbox("ESP Settings")
-espGb:AddToggle("Enable ESP", function(state) end)
-
-espGb:AddColorPicker("Box Color", Color3.fromRGB(0, 185, 255), function(color)
-    print("Box Color changed:", color)
-end)
-
-espGb:AddColorPicker("Text Color", Color3.new(1, 1, 1), function(color)
-    print("Text Color changed:", color)
-end)
-
-local settingsGb = miscTab:CreateGroupbox("Config")
-settingsGb:AddButton("Save Config", function()
-    print("Config Saved!")
-end)
-
-return Library
+return __require('init')

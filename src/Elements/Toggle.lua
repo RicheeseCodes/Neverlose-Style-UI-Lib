@@ -1,13 +1,17 @@
 local Toggle = {}
 Toggle.__index = Toggle
 
-function Toggle.new(text, callback, groupbox)
+function Toggle.new(options, groupbox)
     local self = setmetatable({}, Toggle)
-    self.Text = text
-    self.Callback = callback or function() end
+    self.Options = options
+    self.Text = options.Text
+    self.Flag = options.Flag
+    self.Callback = options.Callback or function() end
     self.Groupbox = groupbox
     self.Library = groupbox.Library
-    self.State = false
+    self.State = options.Default or false
+    
+    self.Library.Flags[self.Flag] = self.State
     
     local theme = self.Library.Theme
     local util = self.Library.Util
@@ -31,7 +35,7 @@ function Toggle.new(text, callback, groupbox)
     fill.Position = UDim2.new(0, 1, 0, 1)
     fill.BackgroundColor3 = theme:GetColor("Accent")
     fill.BorderSizePixel = 0
-    fill.BackgroundTransparency = 1
+    fill.BackgroundTransparency = self.State and 0 or 1
     fill.Parent = box
     self.Fill = fill
     
@@ -40,7 +44,7 @@ function Toggle.new(text, callback, groupbox)
     label.Size = UDim2.new(1, -20, 1, 0)
     label.Position = UDim2.new(0, 20, 0, 0)
     label.BackgroundTransparency = 1
-    label.TextColor3 = theme:GetColor("TextDark")
+    label.TextColor3 = self.State and theme:GetColor("Text") or theme:GetColor("TextDark")
     label.TextSize = theme:GetFont("SmallSize")
     label.Font = theme:GetFont("Main")
     label.TextXAlignment = Enum.TextXAlignment.Left
@@ -56,6 +60,8 @@ end
 
 function Toggle:SetState(state)
     self.State = state
+    self.Library.Flags[self.Flag] = self.State
+    
     local theme = self.Library.Theme
     local util = self.Library.Util
     

@@ -3,14 +3,18 @@ local UserInputService = game:GetService("UserInputService")
 local Keybind = {}
 Keybind.__index = Keybind
 
-function Keybind.new(text, default, callback, groupbox)
+function Keybind.new(options, groupbox)
     local self = setmetatable({}, Keybind)
-    self.Text = text
-    self.Key = default or Enum.KeyCode.Unknown
-    self.Callback = callback or function() end
+    self.OptionsTable = options
+    self.Text = options.Text
+    self.Flag = options.Flag
+    self.Key = options.Default or Enum.KeyCode.Unknown
+    self.Callback = options.Callback or function() end
     self.Groupbox = groupbox
     self.Library = groupbox.Library
     self.Binding = false
+    
+    self.Library.Flags[self.Flag] = self.Key
     
     local theme = self.Library.Theme
     
@@ -51,10 +55,12 @@ function Keybind.new(text, default, callback, groupbox)
         if self.Binding then
             if input.UserInputType == Enum.UserInputType.Keyboard then
                 self.Key = input.KeyCode
+                self.Library.Flags[self.Flag] = self.Key
                 self.Binding = false
                 btn.Text = self:GetKeyName()
             elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 then
                 self.Key = input.UserInputType
+                self.Library.Flags[self.Flag] = self.Key
                 self.Binding = false
                 btn.Text = self:GetKeyName()
             end

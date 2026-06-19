@@ -1,14 +1,18 @@
 local ColorPicker = {}
 ColorPicker.__index = ColorPicker
 
-function ColorPicker.new(text, default, callback, groupbox)
+function ColorPicker.new(options, groupbox)
     local self = setmetatable({}, ColorPicker)
-    self.Text = text
-    self.Color = default or Color3.new(1, 1, 1)
-    self.Callback = callback or function() end
+    self.OptionsTable = options
+    self.Text = options.Text
+    self.Flag = options.Flag
+    self.Color = options.Default or Color3.new(1, 1, 1)
+    self.Callback = options.Callback or function() end
     self.Groupbox = groupbox
     self.Library = groupbox.Library
     self.Open = false
+    
+    self.Library.Flags[self.Flag] = self.Color
     
     local theme = self.Library.Theme
     local util = self.Library.Util
@@ -53,6 +57,7 @@ function ColorPicker.new(text, default, callback, groupbox)
     
     local function UpdateColor()
         self.Color = Color3.new(rSlider.Value, gSlider.Value, bSlider.Value)
+        self.Library.Flags[self.Flag] = self.Color
         self.Button.BackgroundColor3 = self.Color
         task.spawn(self.Callback, self.Color)
     end

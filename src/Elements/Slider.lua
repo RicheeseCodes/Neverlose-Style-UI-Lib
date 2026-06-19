@@ -3,16 +3,20 @@ local UserInputService = game:GetService("UserInputService")
 local Slider = {}
 Slider.__index = Slider
 
-function Slider.new(text, min, max, callback, groupbox)
+function Slider.new(options, groupbox)
     local self = setmetatable({}, Slider)
-    self.Text = text
-    self.Min = min
-    self.Max = max
-    self.Callback = callback or function() end
+    self.Options = options
+    self.Text = options.Text
+    self.Flag = options.Flag
+    self.Min = options.Min or 0
+    self.Max = options.Max or 100
+    self.Callback = options.Callback or function() end
     self.Groupbox = groupbox
     self.Library = groupbox.Library
-    self.Value = min
+    self.Value = options.Default or self.Min
     self.Dragging = false
+    
+    self.Library.Flags[self.Flag] = self.Value
     
     local theme = self.Library.Theme
     
@@ -33,7 +37,7 @@ function Slider.new(text, min, max, callback, groupbox)
     label.Parent = container
     
     local valLabel = Instance.new("TextLabel")
-    valLabel.Text = tostring(min)
+    valLabel.Text = tostring(self.Value)
     valLabel.Size = UDim2.new(1, 0, 0, 15)
     valLabel.BackgroundTransparency = 1
     valLabel.TextColor3 = theme:GetColor("Text")
@@ -53,8 +57,9 @@ function Slider.new(text, min, max, callback, groupbox)
     bar.Parent = container
     self.Bar = bar
     
+    local initialPct = (self.Value - self.Min) / (self.Max - self.Min)
     local fill = Instance.new("Frame")
-    fill.Size = UDim2.new(0, 0, 1, 0)
+    fill.Size = UDim2.new(initialPct, 0, 1, 0)
     fill.BackgroundColor3 = theme:GetColor("Accent")
     fill.BorderSizePixel = 0
     fill.Parent = bar
@@ -86,6 +91,7 @@ function Slider:Update(mouseX)
     local pct = math.clamp((mouseX - barPos) / barSize, 0, 1)
     
     self.Value = math.floor(self.Min + ((self.Max - self.Min) * pct))
+    self.Library.Flags[self.Flag] = self.Value
     self.ValueLabel.Text = tostring(self.Value)
     
     local util = self.Library.Util
@@ -96,6 +102,7 @@ end
 
 function Slider:SetValue(val)
     self.Value = math.clamp(val, self.Min, self.Max)
+    self.Library.Flags[self.Flag] = self.Value
     local pct = (self.Value - self.Min) / (self.Max - self.Min)
     self.ValueLabel.Text = tostring(self.Value)
     

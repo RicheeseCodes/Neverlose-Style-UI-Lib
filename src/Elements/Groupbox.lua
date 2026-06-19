@@ -56,14 +56,20 @@ function Groupbox.new(name, tab)
     return self
 end
 
-function Groupbox:AddToggle(text, callback)
-    local toggle = Toggle.new(text, callback, self)
+function Groupbox:AddToggle(idx, options)
+    options = options or {}
+    options.Flag = idx
+    options.Text = options.Text or idx
+    local toggle = Toggle.new(options, self)
     table.insert(self.Elements, toggle)
     return toggle
 end
 
-function Groupbox:AddSlider(text, min, max, callback)
-    local slider = Slider.new(text, min, max, callback, self)
+function Groupbox:AddSlider(idx, options)
+    options = options or {}
+    options.Flag = idx
+    options.Text = options.Text or idx
+    local slider = Slider.new(options, self)
     table.insert(self.Elements, slider)
     return slider
 end
@@ -74,20 +80,29 @@ function Groupbox:AddButton(text, callback)
     return button
 end
 
-function Groupbox:AddDropdown(text, options, callback)
-    local dropdown = Dropdown.new(text, options, callback, self)
+function Groupbox:AddDropdown(idx, options)
+    options = options or {}
+    options.Flag = idx
+    options.Text = options.Text or idx
+    local dropdown = Dropdown.new(options, self)
     table.insert(self.Elements, dropdown)
     return dropdown
 end
 
-function Groupbox:AddColorPicker(text, default, callback)
-    local picker = ColorPicker.new(text, default, callback, self)
+function Groupbox:AddColorPicker(idx, options)
+    options = options or {}
+    options.Flag = idx
+    options.Text = options.Text or idx
+    local picker = ColorPicker.new(options, self)
     table.insert(self.Elements, picker)
     return picker
 end
 
-function Groupbox:AddKeybind(text, default, callback)
-    local keybind = Keybind.new(text, default, callback, self)
+function Groupbox:AddKeybind(idx, options)
+    options = options or {}
+    options.Flag = idx
+    options.Text = options.Text or idx
+    local keybind = Keybind.new(options, self)
     table.insert(self.Elements, keybind)
     return keybind
 end

@@ -6,7 +6,9 @@ local Window = require(Elements.Window)
 
 local Library = {
     Theme = ThemeManager,
-    Util = Utility
+    Util = Utility,
+    Flags = {},
+    Unloaded = false
 }
 
 function Library:CreateWindow(options)

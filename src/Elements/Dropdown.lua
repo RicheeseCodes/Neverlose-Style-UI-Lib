@@ -1,15 +1,19 @@
 local Dropdown = {}
 Dropdown.__index = Dropdown
 
-function Dropdown.new(text, options, callback, groupbox)
+function Dropdown.new(options, groupbox)
     local self = setmetatable({}, Dropdown)
-    self.Text = text
-    self.Options = options or {}
-    self.Callback = callback or function() end
+    self.OptionsTable = options
+    self.Text = options.Text
+    self.Flag = options.Flag
+    self.Options = options.Values or {}
+    self.Callback = options.Callback or function() end
     self.Groupbox = groupbox
     self.Library = groupbox.Library
-    self.Value = self.Options[1] or ""
+    self.Value = options.Default or self.Options[1] or ""
     self.Open = false
+    
+    self.Library.Flags[self.Flag] = self.Value
     
     local theme = self.Library.Theme
     local util = self.Library.Util
@@ -128,6 +132,7 @@ end
 
 function Dropdown:SetValue(val)
     self.Value = val
+    self.Library.Flags[self.Flag] = self.Value
     self.Button.Text = " " .. tostring(val)
     self:BuildOptions()
     task.spawn(self.Callback, self.Value)
