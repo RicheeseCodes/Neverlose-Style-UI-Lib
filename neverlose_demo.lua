@@ -8,6 +8,12 @@ local win = Library:CreateWindow({
     Size = UDim2.new(0, 550, 0, 400)
 })
 
+Library:Notify({
+    Title = "Welcome",
+    Content = "Successfully loaded Neverlose UI demo!",
+    Duration = 5
+})
+
 local aimbotTab = win:CreateTab("Aimbot")
 local visualsTab = win:CreateTab("Visuals")
 local miscTab = win:CreateTab("Misc")
