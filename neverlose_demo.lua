@@ -14,6 +14,9 @@ Library:Notify({
     Duration = 5
 })
 
+Library:SetWatermarkVisibility(true)
+Library:SetWatermark("Neverlose UI | {fps} FPS | {ping} ms")
+
 local aimbotTab = win:CreateTab("Aimbot")
 local visualsTab = win:CreateTab("Visuals")
 local miscTab = win:CreateTab("Misc")

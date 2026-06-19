@@ -4,6 +4,7 @@ local Utility = require(script.Utility)
 local Elements = script.Elements
 local Window = require(Elements.Window)
 local Notification = require(Elements.Notification)
+local Watermark = require(Elements.Watermark)
 
 local Library = {
     Theme = ThemeManager,
@@ -18,8 +19,19 @@ function Library:Notify(options)
     Notification:Notify(options)
 end
 
+function Library:SetWatermarkVisibility(state)
+    Watermark:SetVisibility(state)
+end
+
+function Library:SetWatermark(text)
+    Watermark:SetText(text)
+end
+
 function Library:CreateWindow(options)
-    return Window.new(options, self)
+    local win = Window.new(options, self)
+    self.Window = win
+    Watermark:Init(self)
+    return win
 end
 
 return Library
