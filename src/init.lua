@@ -13,6 +13,10 @@ local Library = {
     Unloaded = false
 }
 
+local SaveManager = require(script.SaveManager)
+Library.SaveManager = SaveManager
+SaveManager:SetLibrary(Library)
+
 Notification:Init(Library)
 
 function Library:Notify(options)

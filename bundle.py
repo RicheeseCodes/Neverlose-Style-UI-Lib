@@ -39,6 +39,7 @@ add_module("Tab", "src/Elements/Tab.lua")
 add_module("Window", "src/Elements/Window.lua")
 add_module("Notification", "src/Elements/Notification.lua")
 add_module("Watermark", "src/Elements/Watermark.lua")
+add_module("SaveManager", "src/SaveManager.lua")
 add_module("init", "src/init.lua")
 
 bundle.append("return __require('init')")

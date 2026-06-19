@@ -84,7 +84,10 @@ espGb:AddColorPicker("ESPTextColor", {
 
 local settingsGb = miscTab:CreateGroupbox("Config")
 settingsGb:AddButton("Save Config", function()
-    print("Config Saved! Aimbot State is:", Library.Flags["AimbotEnabled"])
+    Library.SaveManager:Save("MyDemoConfig")
+end)
+settingsGb:AddButton("Load Config", function()
+    Library.SaveManager:Load("MyDemoConfig")
 end)
 
 return Library
